@@ -1,0 +1,21 @@
+configuration:
+  logbooks:
+    name: Logbooks
+    description: One entry per logbook. Name may contain letters, numbers, spaces, dot, dash and underscore.
+  authentication:
+    name: Require login
+    description: Protect all logbooks with ELOG user accounts.
+  admin_user:
+    name: Admin user
+    description: ELOG username that gets admin rights. Register this name first.
+  self_register:
+    name: Self registration
+    description: "0 = off, 1 = open, 2 = admin notified, 3 = admin must approve."
+  url:
+    name: External URL
+    description: Optional public URL of ELOG (used in redirects and email links), e.g. http://homeassistant.local:8080/
+  manage_config:
+    name: Manage elogd.cfg
+    description: Regenerate elogd.cfg from these options on every start. Turn off to hand-edit the file.
+network:
+  8080/tcp: ELOG web interface
