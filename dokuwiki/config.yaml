@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/apps/configuration#app-configuration
 name: DokuWiki
-version: "1.0.0"
+version: "1.0.1"
 slug: dokuwiki
 description: Lightweight, database-free wiki that lives in your Home Assistant sidebar
 url: "https://github.com/rpimeekle/ha-apps/tree/main/dokuwiki"
