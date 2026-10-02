@@ -1,11 +1,11 @@
 <#
   One-time setup for Windows: fills in your GitHub details.
 
-  From a VS Code PowerShell terminal, in this folder:
-    .\setup.ps1 -User <github-user> [-Repo ha-apps] [-Maintainer "Your Name <you@example.com>"]
+  From a VS Code PowerShell terminal, at the repo root:
+    .\scripts\setup.ps1 -User <github-user> [-Repo ha-apps] [-Maintainer "Your Name <you@example.com>"]
 
   If Windows blocks the script ("running scripts is disabled"):
-    powershell -ExecutionPolicy Bypass -File .\setup.ps1 -User <github-user>
+    powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -User <github-user>
 #>
 param(
     [Parameter(Mandatory = $true)][string]$User,
@@ -17,7 +17,7 @@ $ErrorActionPreference = "Stop"
 if (-not $Maintainer) { $Maintainer = $User }
 $UserLc  = $User.ToLower()
 $Year    = (Get-Date).Year.ToString()
-$Root    = $PSScriptRoot
+$Root    = Split-Path -Parent $PSScriptRoot   # repo root
 $Utf8    = New-Object System.Text.UTF8Encoding($false)   # no BOM, keeps files Linux-friendly
 $Pattern = '__GH_USER(_LC)?__|__GH_REPO__|__MAINTAINER__|__YEAR__'
 $Skip    = @('setup.sh', 'setup.ps1')

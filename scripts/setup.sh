@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # One-time: fill in your GitHub details (Linux, macOS, WSL or Git Bash).
-#   ./setup.sh <github-user> [repo-name] ["Your Name <you@example.com>"]
-# On Windows without bash, use setup.ps1 instead.
+#   scripts/setup.sh <github-user> [repo-name] ["Your Name <you@example.com>"]
+# On Windows without bash, use scripts/setup.ps1 instead.
 set -uo pipefail
 if [ $# -lt 1 ]; then
-  echo "usage: ./setup.sh <github-user> [repo-name] [\"Your Name <you@example.com>\"]" >&2
+  echo "usage: scripts/setup.sh <github-user> [repo-name] [\"Your Name <you@example.com>\"]" >&2
   exit 1
 fi
 USER_NAME="$1"
@@ -12,7 +12,7 @@ REPO="${2:-ha-apps}"
 MAINT="${3:-${USER_NAME}}"
 USER_LC="$(printf '%s' "${USER_NAME}" | tr '[:upper:]' '[:lower:]')"
 YEAR="$(date +%Y)"
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # repo root
 
 FILES="$(grep -rlE '__GH_USER(_LC)?__|__GH_REPO__|__MAINTAINER__|__YEAR__' \
          --exclude=setup.sh --exclude=setup.ps1 --exclude='*.png' --exclude-dir=.git . || true)"
