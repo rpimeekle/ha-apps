@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/apps/configuration#app-dockerfile
 # Multi-arch Home Assistant base image (Alpine 3.23 + s6-overlay + bashio)
-FROM ghcr.io/home-assistant/base:3.23-2026.05.0
+FROM ghcr.io/home-assistant/base:3.24-2026.08.0
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
