@@ -135,7 +135,13 @@ probe() {  # probe <port> <path> [extra header line]
 selftest() {
   sleep 3
   log "Self-test elogd  (127.0.0.1:8080): $(probe 8080 /)"
-  log "Self-test ingress (127.0.0.1:8099): $(probe 8099 / $'X-Ingress-Path: /api/hassio_ingress/SELFTEST\r\n')"
+  local r
+  r="$(probe 8099 / $'X-Ingress-Path: /api/hassio_ingress/SELFTEST\r\n')"
+  log "Self-test ingress (127.0.0.1:8099): ${r}"
+  case "${r}" in
+    *"ocation: /api/hassio_ingress/SELFTEST/"*) log "Self-test ingress: OK (redirects stay inside the panel)" ;;
+    *"ocation:"*) log "Self-test ingress: PROBLEM - redirect is not panel-relative; the sidebar panel will not load" ;;
+  esac
 }
 selftest &
 
