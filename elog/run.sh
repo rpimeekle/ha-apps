@@ -117,6 +117,28 @@ log "Starting ingress proxy on port 8099"
 nginx -g 'daemon off;' &
 NGINX_PID=$!
 
+# --- start-up self-test: reports in the log whether each hop answers ---
+probe() {  # probe <port> <path> [extra header line]
+  local port="$1" path="$2" extra="${3:-}" line out=""
+  exec 3<>"/dev/tcp/127.0.0.1/${port}" || { echo "connection refused"; return; }
+  printf 'GET %s HTTP/1.0\r\nHost: localhost\r\n%s\r\n' "${path}" "${extra}" >&3
+  while IFS= read -r -t 10 line <&3; do
+    line="${line%$'\r'}"
+    [ -z "${line}" ] && break
+    case "${line,,}" in
+      http/*|location:*|x-frame-options:*|content-security-policy:*) out+="${line} | " ;;
+    esac
+  done
+  exec 3<&- 3>&-
+  echo "${out:-NO RESPONSE within 10s}"
+}
+selftest() {
+  sleep 3
+  log "Self-test elogd  (127.0.0.1:8080): $(probe 8080 /)"
+  log "Self-test ingress (127.0.0.1:8099): $(probe 8099 / $'X-Ingress-Path: /api/hassio_ingress/SELFTEST\r\n')"
+}
+selftest &
+
 shutdown() {
   log "Stopping"
   kill -TERM "${ELOG_PID}" "${NGINX_PID}" 2>/dev/null || true

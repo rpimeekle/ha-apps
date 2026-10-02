@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+- Fixed the sidebar (ingress) panel spinning forever instead of loading ELOG.
+- Added a start-up self-test and per-request proxy logging to make connection problems easy to diagnose.
+
 ## 1.1.1
 - Added `setup.ps1` so the one-time repository setup works natively on Windows (PowerShell).
 - Fixed `setup.sh` exiting silently in some cases; it now prints usage, reports each updated file, and detects an already-configured repo.
