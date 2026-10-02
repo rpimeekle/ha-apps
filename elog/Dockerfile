@@ -62,7 +62,7 @@ LABEL \
     io.hass.type="addon" \
     io.hass.version="${BUILD_VERSION}" \
     org.opencontainers.image.title="ELOG for Home Assistant" \
-    org.opencontainers.image.source="https://github.com/rpimeekle/ha-elog" \
+    org.opencontainers.image.source="https://github.com/rpimeekle/ha-apps" \
     org.opencontainers.image.licenses="GPL-3.0-only"
 
 EXPOSE 8080 8099

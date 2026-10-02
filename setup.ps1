@@ -2,7 +2,7 @@
   One-time setup for Windows: fills in your GitHub details.
 
   From a VS Code PowerShell terminal, in this folder:
-    .\setup.ps1 -User <github-user> [-Repo ha-elog] [-Maintainer "Your Name <you@example.com>"]
+    .\setup.ps1 -User <github-user> [-Repo ha-apps] [-Maintainer "Your Name <you@example.com>"]
 
   If Windows blocks the script ("running scripts is disabled"):
     powershell -ExecutionPolicy Bypass -File .\setup.ps1 -User <github-user>

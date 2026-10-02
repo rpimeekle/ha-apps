@@ -3,7 +3,7 @@ name: DokuWiki
 version: "1.0.0"
 slug: dokuwiki
 description: Lightweight, database-free wiki that lives in your Home Assistant sidebar
-url: "https://github.com/rpimeekle/ha-dokuwiki/tree/main/dokuwiki"
+url: "https://github.com/rpimeekle/ha-apps/tree/main/dokuwiki"
 arch:
   - aarch64
   - amd64
