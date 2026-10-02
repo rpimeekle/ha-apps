@@ -1,0 +1,43 @@
+# Generated at start-up from /etc/nginx/templates/dokuwiki.conf.tmpl
+root /var/www/dokuwiki;
+index doku.php;
+
+client_max_body_size __UPLOAD_LIMIT__m;
+client_body_buffer_size 128k;
+absolute_redirect off;
+
+# Never expose internals (data/ is only served through fetch.php / X-Accel)
+location ~ ^/(conf|bin|inc|vendor)/ { deny all; }
+location ~ ^/data/ { internal; }
+location ~ /\.ht { deny all; }
+
+# Static assets of the core, templates and plugins
+location ~* ^/lib/.+\.(css|js|gif|png|jpe?g|svg|ico|webp|woff2?|ttf|eot)$ {
+    expires 7d;
+    try_files $uri =404;
+}
+
+location / {
+    try_files $uri $uri/ @dokuwiki;
+}
+
+# "Nice URLs" support (Admin > Configuration > userewrite = .htaccess)
+location @dokuwiki {
+    rewrite ^/_media/(.*) /lib/exe/fetch.php?media=$1 last;
+    rewrite ^/_detail/(.*) /lib/exe/detail.php?media=$1 last;
+    rewrite ^/_export/([^/]+)/(.*) /doku.php?do=export_$1&id=$2 last;
+    rewrite ^/(.*) /doku.php?id=$1&$args last;
+}
+
+location ~ \.php$ {
+    try_files $uri =404;
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param REDIRECT_STATUS 200;
+    fastcgi_param HA_INGRESS $ha_ingress;
+    fastcgi_read_timeout 300s;
+    fastcgi_buffers 16 16k;
+    fastcgi_buffer_size 32k;
+    fastcgi_pass unix:/run/php-fpm.sock;
+}

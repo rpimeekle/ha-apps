@@ -9,7 +9,7 @@
 #>
 param(
     [Parameter(Mandatory = $true)][string]$User,
-    [string]$Repo = "ha-elog",
+    [string]$Repo = "ha-apps",
     [string]$Maintainer = ""
 )
 $ErrorActionPreference = "Stop"

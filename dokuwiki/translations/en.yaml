@@ -1,0 +1,14 @@
+configuration:
+  upload_limit_mb:
+    name: Upload limit (MB)
+    description: >-
+      Largest single file that can be uploaded to the media manager.
+  memory_limit_mb:
+    name: PHP memory limit (MB)
+    description: >-
+      Memory available to each PHP request. The default suits most wikis;
+      raise it only if large pages or plugins hit memory errors.
+network:
+  80/tcp: >-
+    Direct web access from your network. Leave empty to only use the
+    Home Assistant sidebar.

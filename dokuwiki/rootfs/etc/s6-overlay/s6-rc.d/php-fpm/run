@@ -1,0 +1,7 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Start PHP-FPM (runs DokuWiki)
+# ==============================================================================
+bashio::log.info "Starting PHP-FPM..."
+exec php-fpm84 --nodaemonize --fpm-config /etc/php84/php-fpm.conf

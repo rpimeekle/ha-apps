@@ -8,7 +8,7 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 USER_NAME="$1"
-REPO="${2:-ha-elog}"
+REPO="${2:-ha-apps}"
 MAINT="${3:-${USER_NAME}}"
 USER_LC="$(printf '%s' "${USER_NAME}" | tr '[:upper:]' '[:lower:]')"
 YEAR="$(date +%Y)"
