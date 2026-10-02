@@ -14,10 +14,10 @@ repository once and every app below appears in your App Store.
 
 ## Apps
 
-| App | Description | Docs |
-|---|---|---|
-| [ELOG](elog/) | Lightweight PSI ELOG electronic logbook | [elog/DOCS.md](elog/DOCS.md) |
-| [DokuWiki](dokuwiki/) | Lightweight file-based DokuWiki wiki | [dokuwiki/DOCS.md](dokuwiki/DOCS.md) |
+| App                   | Description                             | Docs                                 |
+| --------------------- | --------------------------------------- | ------------------------------------ |
+| [ELOG](elog/)         | Lightweight PSI ELOG electronic logbook | [elog/DOCS.md](elog/DOCS.md)         |
+| [DokuWiki](dokuwiki/) | Lightweight file-based DokuWiki wiki    | [dokuwiki/DOCS.md](dokuwiki/DOCS.md) |
 
 [repo-badge]: https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg
 [repo-link]: https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Frpimeekle%2Fha-apps

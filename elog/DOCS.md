@@ -21,14 +21,14 @@ threaded entries, attributes, attachments, full-text search, no database.
 
 ## Options
 
-| Option | Meaning |
-|---|---|
-| `logbooks` | List of logbooks (`name`, optional `description`). Each becomes a tab. |
-| `authentication` | Require ELOG user accounts for all logbooks. |
-| `admin_user` | Username that gets admin rights. **Register this name first.** |
-| `self_register` | 0 off · 1 open · 2 admin notified · 3 admin must approve. |
-| `url` | Optional external URL, e.g. `http://homeassistant.local:8080/`. Set it if redirects after saving go to the wrong host. |
-| `manage_config` | Regenerate `elogd.cfg` from these options on every start. |
+| Option           | Meaning                                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `logbooks`       | List of logbooks (`name`, optional `description`). Each becomes a tab.                                                 |
+| `authentication` | Require ELOG user accounts for all logbooks.                                                                           |
+| `admin_user`     | Username that gets admin rights. **Register this name first.**                                                         |
+| `self_register`  | 0 off · 1 open · 2 admin notified · 3 admin must approve.                                                              |
+| `url`            | Optional external URL, e.g. `http://homeassistant.local:8080/`. Set it if redirects after saving go to the wrong host. |
+| `manage_config`  | Regenerate `elogd.cfg` from these options on every start.                                                              |
 
 ### Turning on login
 
@@ -44,7 +44,7 @@ Samba or File editor apps). ELOG has hundreds of options; see the
 
 To hand-edit it, set `manage_config: false` first, otherwise your edits are
 overwritten at the next start. The same applies to changes made through ELOG's
-own *Config* page in the web UI.
+own _Config_ page in the web UI.
 
 ## Data and backups
 

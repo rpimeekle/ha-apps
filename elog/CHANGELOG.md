@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+
+- Fixed the sidebar panel still not loading: redirects now stay inside Home Assistant instead of pointing to an internal address the browser can't reach.
+- The start-up self-test now reports a clear OK/PROBLEM verdict for the panel.
+- Updated documentation formatting, and logo issue
+
 ## 1.1.2
 
 - Fixed the sidebar (ingress) panel spinning forever instead of loading ELOG.

@@ -17,8 +17,8 @@ See [elog/DOCS.md](elog/DOCS.md) for configuration.
 
 ## Apps in this repository
 
-| App | Description |
-|---|---|
+| App           | Description                                    |
+| ------------- | ---------------------------------------------- |
 | [ELOG](elog/) | Lightweight PSI ELOG electronic logbook server |
 
 [repo-badge]: https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg
