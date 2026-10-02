@@ -38,4 +38,4 @@ schema:
   memory_limit_mb: int(64,4096)
 
 # Uncomment once you publish prebuilt images (see repository README)
-# image: "ghcr.io/rpimeekle/ha-dokuwiki"
+# image: "ghcr.io/rpimeekle/dokuwiki"
