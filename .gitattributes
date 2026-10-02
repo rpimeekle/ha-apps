@@ -1,0 +1,5 @@
+# Keep Linux line endings even when committed from Windows;
+# CRLF in run.sh or the Dockerfile breaks the container.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary

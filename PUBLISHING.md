@@ -3,7 +3,10 @@
 ## First publish
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 ./setup.sh <your-github-user> ha-elog "Your Name <you@example.com>"
+# Windows PowerShell
+.\setup.ps1 -User <your-github-user> -Maintainer "Your Name <you@example.com>"
 git init -b main && git add -A && git commit -m "ELOG app 1.1.0"
 gh repo create ha-elog --public --source=. --push   # or create it on github.com and push
 ```
