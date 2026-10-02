@@ -89,5 +89,5 @@ LABEL \
     io.hass.description="Lightweight, database-free wiki for Home Assistant" \
     org.opencontainers.image.title="DokuWiki for Home Assistant" \
     org.opencontainers.image.description="DokuWiki ${DOKUWIKI_VERSION} on nginx + PHP-FPM with Home Assistant ingress support" \
-    org.opencontainers.image.source="https://github.com/rpimeekle/ha-dokuwiki" \
+    org.opencontainers.image.source="https://github.com/rpimeekle/ha-apps" \
     org.opencontainers.image.licenses="MIT"
