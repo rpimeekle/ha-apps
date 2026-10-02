@@ -4,7 +4,7 @@
 
 - Fixed the sidebar panel still not loading: redirects now stay inside Home Assistant instead of pointing to an internal address the browser can't reach.
 - The start-up self-test now reports a clear OK/PROBLEM verdict for the panel.
-- Updated documentation formatting, and logo issue
+- Fixed the app logo; tidied documentation formatting.
 
 ## 1.1.2
 
