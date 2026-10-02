@@ -51,7 +51,6 @@ RUN apt-get update \
 
 COPY --from=builder /opt/elog /opt/elog
 COPY rootfs/ /
-COPY run.sh /run.sh
 RUN chmod a+x /run.sh \
  && rm -f /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*
 
