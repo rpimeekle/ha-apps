@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/apps/configuration#app-dockerfile
-# Multi-arch Home Assistant base image (Alpine 3.23 + s6-overlay + bashio)
-FROM ghcr.io/home-assistant/base:3.23-2026.05.0
+# Multi-arch Home Assistant base image (Alpine 3.24 + s6-overlay + bashio)
+FROM ghcr.io/home-assistant/base:3.24-2026.08.0
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -89,5 +89,5 @@ LABEL \
     io.hass.description="Lightweight, database-free wiki for Home Assistant" \
     org.opencontainers.image.title="DokuWiki for Home Assistant" \
     org.opencontainers.image.description="DokuWiki ${DOKUWIKI_VERSION} on nginx + PHP-FPM with Home Assistant ingress support" \
-    org.opencontainers.image.source="https://github.com/rpimeekle/ha-dokuwiki" \
+    org.opencontainers.image.source="https://github.com/rpimeekle/ha-apps" \
     org.opencontainers.image.licenses="MIT"

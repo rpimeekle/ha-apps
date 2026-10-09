@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- Updated the Home Assistant base image to Alpine 3.24 (`base:3.24-2026.08.0`).
+- Image metadata now links to the `ha-apps` repository.
+
 ## 1.0.0
 
 - Initial release
