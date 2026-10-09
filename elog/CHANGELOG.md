@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.4
+
+- Fixed the panel showing "Invalid URL: app/General/" and saving settings landing on a 404. ELOG was building its redirects from the Home Assistant page address; the proxy now hides that from ELOG.
+- The start-up self-test now also checks for this problem.
+- The "Logbooks:" line in the log now lists the logbooks from the actual config file, including hand-edited ones.
+
 ## 1.1.3
 
 - Fixed the sidebar panel still not loading: redirects now stay inside Home Assistant instead of pointing to an internal address the browser can't reach.

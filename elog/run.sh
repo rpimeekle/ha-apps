@@ -98,7 +98,8 @@ fi
 # elogd drops to user 'elog' after binding; it must own its data and config
 chown -R elog:elog "${DATA}" "${CFG}"
 
-log "Logbooks: $(jq -r '[.logbooks[].name] | join(", ")' "${OPTIONS}")"
+# List the logbooks elogd will actually serve (the config may be hand-edited)
+log "Logbooks: $(sed -n 's/^[[:space:]]*\[\(.*\)\][[:space:]]*$/\1/p' "${CFG}" | grep -vix global | paste -sd, - | sed 's/,/, /g')"
 
 # Extra ingress rewrite for the configured external URL (if any)
 EXTRA=/run/elog-ingress-extra.conf
@@ -136,9 +137,11 @@ selftest() {
   sleep 3
   log "Self-test elogd  (127.0.0.1:8080): $(probe 8080 /)"
   local r
-  r="$(probe 8099 / $'X-Ingress-Path: /api/hassio_ingress/SELFTEST\r\n')"
+  # Send a Referer like the Home Assistant page hosting the panel iframe
+  r="$(probe 8099 / $'X-Ingress-Path: /api/hassio_ingress/SELFTEST\r\nReferer: https://homeassistant.local/app/elog\r\n')"
   log "Self-test ingress (127.0.0.1:8099): ${r}"
   case "${r}" in
+    *"ocation: /api/hassio_ingress/SELFTEST/app/"*) log "Self-test ingress: PROBLEM - redirect follows the Home Assistant page (Referer); the panel will show 'Invalid URL'" ;;
     *"ocation: /api/hassio_ingress/SELFTEST/"*) log "Self-test ingress: OK (redirects stay inside the panel)" ;;
     *"ocation:"*) log "Self-test ingress: PROBLEM - redirect is not panel-relative; the sidebar panel will not load" ;;
   esac
