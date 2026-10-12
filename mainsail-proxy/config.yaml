@@ -1,0 +1,31 @@
+# https://developers.home-assistant.io/docs/apps/configuration
+name: Mainsail
+version: "1.0.0"
+slug: mainsail
+description: Mainsail web interface for Klipper in the Home Assistant sidebar, connected to your existing Moonraker server
+url: https://github.com/rpimeekle/ha-apps/tree/main/mainsail
+arch:
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+init: true
+
+# Sidebar panel only; Mainsail stays reachable directly on your Klipper host
+ingress: true
+ingress_port: 8099
+ingress_stream: true        # stream G-code uploads instead of buffering them
+panel_icon: mdi:printer-3d-nozzle
+panel_title: Mainsail
+panel_admin: true           # full printer control: admins only by default
+
+# Uncomment once CI has published the image and the GHCR package is public.
+# image: "ghcr.io/rpimeekle/mainsail"
+
+options:
+  log_requests: false
+schema:
+  moonraker_url: url
+  moonraker_api_key: password?
+  webcam_url: url?
+  log_requests: bool
