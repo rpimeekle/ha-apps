@@ -65,7 +65,17 @@ fi
 
 if [ -n "${WEBCAM_URL}" ]; then
   [[ "${WEBCAM_URL}" =~ ^https?://[^/]+ ]] || die "webcam_url '${WEBCAM_URL}' is not a valid http(s) URL"
-  W_BASE="${WEBCAM_URL%/}/"
+  # A stream or snapshot address (.../stream, .../?action=stream) is an easy
+  # mistake; Mainsail appends those itself, so proxy the streamer's base instead
+  W_BASE="${WEBCAM_URL%%\?*}"
+  W_BASE="${W_BASE%/}"
+  if [[ "${W_BASE}" =~ ^https?://[^/]+(/.*)?/(stream|snapshot)$ ]]; then
+    W_BASE="${W_BASE%/*}"
+  fi
+  W_BASE="${W_BASE}/"
+  if [ "${W_BASE}" != "${WEBCAM_URL%/}/" ]; then
+    log "webcam_url '${WEBCAM_URL}' looks like a stream address; using the camera streamer's base ${W_BASE}"
+  fi
   cat > "${GEN}/webcam.conf" <<CONF
 location /webcam/ {
     proxy_pass ${W_BASE};

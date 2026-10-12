@@ -38,7 +38,9 @@ used directly (and is blocked outright if you open Home Assistant over HTTPS).
 Instead:
 
 1. Set **Webcam URL** to your camera streamer's base address, for example
-   `http://192.168.1.50:8080/` for crowsnest/ustreamer.
+   `http://192.168.1.50:8080/` for crowsnest/ustreamer. Use the address of
+   the streamer's own page, not of the stream itself (`.../stream` or
+   `...?action=stream`): Mainsail adds that part.
 2. In Mainsail → Settings → Webcams, set the URLs **without a leading slash**:
    - Stream: `webcam/?action=stream`
    - Snapshot: `webcam/?action=snapshot`
