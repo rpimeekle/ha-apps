@@ -24,6 +24,9 @@ SOFTWARE.
 This license covers the packaging in this repository (Dockerfiles, scripts,
 configuration). The packaged applications keep their own licences and are
 downloaded from upstream at build time:
-  - ELOG: (c) Stefan Ritt / PSI, GNU GPL v3
-  - DokuWiki: (c) Andreas Gohr and contributors, GNU GPL v2
+
+- DokuWiki: (c) Andreas Gohr and contributors, GNU GPL v2
+- ELOG: (c) Stefan Ritt / PSI, GNU GPL v3
+- Mainsail: (c) Mainsail-Crew, GNU GPL v3
+
 Container images built from this repository therefore contain GPL software.

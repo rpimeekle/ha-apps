@@ -1,0 +1,10 @@
+configuration:
+  truenas_url:
+    name: TrueNAS URL
+    description: Address of your TrueNAS web interface, e.g. https://192.168.1.20 (add the port if it isn't the default). Use an IP address rather than a .local name.
+  verify_ssl:
+    name: Verify certificate
+    description: Check TrueNAS's HTTPS certificate. Leave off for the default self-signed certificate.
+  log_requests:
+    name: Log requests
+    description: Write one log line per request. Useful for troubleshooting; leave off otherwise.

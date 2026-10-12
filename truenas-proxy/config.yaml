@@ -1,0 +1,30 @@
+# https://developers.home-assistant.io/docs/apps/configuration
+name: TrueNAS UI
+version: "1.0.0"
+slug: truenas
+description: Open your TrueNAS web interface from the Home Assistant sidebar
+url: https://github.com/rpimeekle/ha-apps/tree/main/truenas-proxy
+arch:
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+init: true
+
+ingress: true
+ingress_port: 8099
+ingress_stream: true        # stream uploads (config restore, update files)
+panel_icon: mdi:nas
+panel_title: TrueNAS
+panel_admin: true
+
+# Uncomment once CI has published the image and the GHCR package is public.
+# image: "ghcr.io/rpimeekle/truenas"
+
+options:
+  verify_ssl: false
+  log_requests: false
+schema:
+  truenas_url: url
+  verify_ssl: bool
+  log_requests: bool
