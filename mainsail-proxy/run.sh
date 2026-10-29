@@ -63,19 +63,62 @@ fi
   [ "${M_SCHEME}" = "https" ] && echo "proxy_ssl_server_name on;"
 } > "${GEN}/moonraker.conf"
 
+# ---- webcam -------------------------------------------------------------------
+# normalize_url URL -> scheme://host[:port]/path (lower-case host, default port
+# dropped, query removed), the same form a browser's URL().href produces
+normalize_url() {
+  local u="${1%%\?*}" re='^([A-Za-z]+)://([^/:]+|\[[0-9a-fA-F:]+\])(:([0-9]+))?(/[^?#]*)?$'
+  [[ "${u}" =~ ${re} ]] || return 1
+  local sch="${BASH_REMATCH[1],,}" host="${BASH_REMATCH[2],,}" port="${BASH_REMATCH[4]:-}" path="${BASH_REMATCH[5]:-/}"
+  [[ "${sch}" == http || "${sch}" == https ]] || return 1
+  if [[ "${sch}:${port}" == "http:80" || "${sch}:${port}" == "https:443" ]]; then port=""; fi
+  printf '%s://%s%s%s' "${sch}" "${host}" "${port:+:${port}}" "${path}"
+}
+
+# Mainsail keeps its webcam list in Moonraker; read it for detection and the self-test
+WEBCAMS="${GEN}/webcams.json"
+rm -f "${WEBCAMS}"
+cam_hdr=()
+[ -n "${API_KEY}" ] && cam_hdr=(-H "X-Api-Key: ${API_KEY}")
+if curl -sf -m 5 "${cam_hdr[@]}" "${UPSTREAM}/server/webcams/list" -o "${WEBCAMS}.tmp" 2>/dev/null \
+   && jq -e '.result.webcams | type == "array"' "${WEBCAMS}.tmp" >/dev/null 2>&1; then
+  jq '[.result.webcams[] | select(.enabled != false) | {name, stream_url, snapshot_url, service}]' "${WEBCAMS}.tmp" > "${WEBCAMS}"
+fi
+rm -f "${WEBCAMS}.tmp"
+
+W_BASE=""
 if [ -n "${WEBCAM_URL}" ]; then
-  [[ "${WEBCAM_URL}" =~ ^https?://[^/]+ ]] || die "webcam_url '${WEBCAM_URL}' is not a valid http(s) URL"
-  # A stream or snapshot address (.../stream, .../?action=stream) is an easy
-  # mistake; Mainsail appends those itself, so proxy the streamer's base instead
-  W_BASE="${WEBCAM_URL%%\?*}"
-  W_BASE="${W_BASE%/}"
-  if [[ "${W_BASE}" =~ ^https?://[^/]+(/.*)?/(stream|snapshot)$ ]]; then
-    W_BASE="${W_BASE%/*}"
+  if [[ "${WEBCAM_URL}" == *\?* ]]; then
+    log "webcam_url should be the camera's base address: ignoring '?${WEBCAM_URL#*\?}'"
   fi
-  W_BASE="${W_BASE}/"
-  if [ "${W_BASE}" != "${WEBCAM_URL%/}/" ]; then
+  W_BASE="$(normalize_url "${WEBCAM_URL}")" || die "webcam_url '${WEBCAM_URL}' is not a valid http(s) URL"
+  # A stream or snapshot address (.../stream, .../snapshot) is an easy mistake;
+  # Mainsail appends those itself, so proxy the streamer's base instead
+  if [[ "${W_BASE%/}" =~ ^https?://[^/]+(/.*)?/(stream|snapshot)$ ]]; then
+    W_BASE="${W_BASE%/}"; W_BASE="${W_BASE%/*}/"
     log "webcam_url '${WEBCAM_URL}' looks like a stream address; using the camera streamer's base ${W_BASE}"
   fi
+  log "Webcam: using webcam_url ${W_BASE}"
+elif [ -s "${WEBCAMS}" ]; then
+  # First camera with a full http(s) address: use its scheme://host:port/ as the base
+  first="$(jq -r '[.[] | (.stream_url // ""), (.snapshot_url // "") | select(test("^https?://"; "i"))][0] // empty' "${WEBCAMS}")"
+  if [ -n "${first}" ] && n="$(normalize_url "${first}")"; then
+    W_BASE="$(printf '%s' "${n}" | sed -E 's#^(https?://[^/]+)/.*#\1/#')"
+    log "Webcam: detected ${W_BASE} from Mainsail's webcam settings"
+  elif jq -e 'any(.[]; [(.stream_url // ""), (.snapshot_url // "")] | any(test("^/?webcam/")))' "${WEBCAMS}" >/dev/null; then
+    # /webcam/ is served by the web server on the Klipper machine (port 80 on
+    # MainsailOS/KIAUH installs), which is normally the Moonraker host
+    W_BASE="$(normalize_url "http://${M_HOST}/webcam/")"
+    log "Webcam: cameras use /webcam/, so using ${W_BASE} (the Moonraker host's web server)."
+    log "  If Mainsail on that machine isn't on port 80, set webcam_url to its address plus /webcam/"
+  fi
+fi
+W_BASE="${W_BASE%/}/"; [ "${W_BASE}" = "/" ] && W_BASE=""
+
+if [ -n "${W_BASE}" ]; then
+  # The base is written into nginx config and into a JS string: keep it plain
+  SAFE_URL_RE='^https?://[][A-Za-z0-9._~:/%@!,;=+-]+$'
+  [[ "${W_BASE}" =~ ${SAFE_URL_RE} ]] || die "webcam address '${W_BASE}' contains unsupported characters"
   cat > "${GEN}/webcam.conf" <<CONF
 location /webcam/ {
     proxy_pass ${W_BASE};
@@ -84,10 +127,16 @@ location /webcam/ {
     proxy_read_timeout 1d;
 }
 CONF
-  log "Webcam: /webcam/ -> ${W_BASE}"
 else
-  : > "${GEN}/webcam.conf"
+  # Fail clearly instead of serving the Mainsail page as a "camera"
+  cat > "${GEN}/webcam.conf" <<'CONF'
+location /webcam/ {
+    default_type text/plain;
+    return 503 "No camera address: set webcam_url in the Mainsail app options\n";
+}
+CONF
 fi
+printf "sub_filter '__HA_WEBCAM_BASE__' '%s';\n" "${W_BASE}" > "${GEN}/webcam_filter.conf"
 
 if [ "${LOG_REQUESTS}" = "true" ]; then
   cat > "${GEN}/logging.conf" <<'CONF'
@@ -131,7 +180,78 @@ selftest() {
   else
     log "Self-test panel: PROBLEM - Mainsail paths are not being rewritten; the sidebar panel will not load"
   fi
+
+  webcam_selftest
 }
+
+# cam_fetch URL -> "OK" or a reason. Streams never end, so a time-out after the
+# headers arrived is fine: only the status and content type matter.
+cam_fetch() {
+  local out err code type
+  out="$(curl -sS -m 4 -o /dev/null -w '%{http_code} %{content_type}' "$1" 2>/tmp/cam.err)" || true
+  err="$(grep -v 'Operation timed out' /tmp/cam.err | tr '\n' ' ')"; rm -f /tmp/cam.err
+  code="${out%% *}"; type="${out#* }"
+  case "${code}" in
+    200) case "${type}" in
+           image/*|multipart/*) echo OK ;;
+           *) echo "answered with '${type:-unknown}', not a camera image" ;;
+         esac ;;
+    000|"") echo "unreachable (${err:-no response})" ;;
+    *) echo "HTTP ${code}" ;;
+  esac
+}
+
+webcam_selftest() {
+  local count i name url up verdict n
+  count=0
+  [ -s "${WEBCAMS}" ] && count="$(jq length "${WEBCAMS}")"
+  if [ "${count}" = 0 ]; then
+    if [ -z "${W_BASE}" ]; then
+      log "Self-test webcam: no cameras set up in Mainsail"
+    else
+      verdict="$(cam_fetch "${W_BASE}?action=snapshot")"
+      log "Self-test webcam (${W_BASE}): ${verdict}"
+    fi
+    return
+  fi
+  for ((i = 0; i < count; i++)); do
+    name="$(jq -r ".[${i}].name // \"camera $((i + 1))\"" "${WEBCAMS}")"
+    # Prefer the snapshot address (a single image), fall back to the stream
+    url="$(jq -r ".[${i}] | if ((.snapshot_url // \"\") != \"\") then .snapshot_url else (.stream_url // \"\") end" "${WEBCAMS}")"
+    up=""
+    if [[ "${url}" =~ ^[Hh][Tt][Tt][Pp][Ss]?:// ]]; then
+      n="$(normalize_url "${url}")" || n=""
+      if [ -n "${W_BASE}" ] && [[ "${n}" == "${W_BASE}"* ]]; then
+        up="${url}"
+      else
+        log "Self-test webcam '${name}': uses ${url%%\?*}, which the panel isn't set to route,"
+        log "  so it will only show at home over plain http. Set webcam_url to $(printf '%s' "${n}" | sed -E 's#^(https?://[^/]+)/.*#\1/#')"
+        continue
+      fi
+    elif [[ "${url}" == /webcam/* || "${url}" == webcam/* ]]; then
+      if [ -z "${W_BASE}" ]; then
+        log "Self-test webcam '${name}': uses ${url%%\?*} but no camera address is set."
+        log "  Set webcam_url to the address that serves /webcam/ on your network."
+        continue
+      fi
+      up="${W_BASE}${url#*webcam/}"
+    else
+      log "Self-test webcam '${name}': uses '${url}', which the panel can't route (only full addresses and /webcam/ are supported)"
+      continue
+    fi
+    verdict="$(cam_fetch "${up}")"
+    if [ "${verdict}" = OK ]; then
+      log "Self-test webcam '${name}': OK (shown through the panel via ${W_BASE})"
+    else
+      log "Self-test webcam '${name}': PROBLEM - ${up%%\?*} ${verdict}"
+      case "${verdict}" in
+        answered*) log "  That address returns a web page (often Mainsail itself), not the camera. Use the camera streamer's own address." ;;
+        unreachable*) log "  Home Assistant can't reach the camera: check it's on the same network and its port is open to other machines." ;;
+      esac
+    fi
+  done
+}
+
 selftest &
 
 log "Mainsail $(jq -r .version /var/www/mainsail/release_info.json 2>/dev/null || echo '?') -> Moonraker ${UPSTREAM}"
