@@ -63,18 +63,21 @@ patch(js, r"getHostUrl:(\w)=>`\$\{\1\.protocol===`wss`\?`https`:`http`\}://\$\{\
       expect="?", label="host URL includes panel prefix")
 # Webcam URLs. Mainsail resolves every camera address through convertUrl().
 #  - A full camera address (e.g. http://10.0.0.5:8080/?action=stream) that
-#    starts with the camera base the app was given (__HA_WEBCAM_BASE__, filled
-#    in by nginx) is routed through the panel at webcam/, which the app proxies
-#    to the camera. The browser never has to reach the camera itself, so the
-#    same setting works at home and remotely.
+#    starts with one of the camera addresses the app routes
+#    (__HA_WEBCAM_BASES__, space-separated, filled in by nginx) is shown
+#    through the panel at webcams/<index>/, which the app proxies to that
+#    camera. The browser never has to reach the camera itself, so the same
+#    setting works at home and remotely.
 #  - Root-relative addresses ("/webcam/?action=stream") are kept inside the
 #    panel instead of escaping to the root of the Home Assistant site.
-# Outside ingress both placeholders are "" and this is a no-op.
+# Outside ingress both placeholders are "" and this is a no-op. Names start
+# with __ so they can't shadow the minified code's own variables.
 CAM_JS = (
     "if(typeof @V@==`string`){"
-    "let B=`__HA_WEBCAM_BASE__`;"
-    "if(B&&/^https?:[/][/]/i.test(@V@)){try{let u=new URL(@V@).href;"
-    "if(u.startsWith(B))@V@=`PFX/webcam/`+u.slice(B.length)}catch(x){}}"
+    "let __wb=`__HA_WEBCAM_BASES__`.split(` `).filter(Boolean),__wm=``;"
+    "if(__wb.length&&/^https?:[/][/]/i.test(@V@)){try{let __wu=new URL(@V@).href;"
+    "for(let __w of __wb)if(__wu.startsWith(__w)&&__w.length>__wm.length)__wm=__w;"
+    "if(__wm)@V@=`PFX/webcams/`+__wb.indexOf(__wm)+`/`+__wu.slice(__wm.length)}catch(__wx){}}"
     "if(@V@.startsWith(`/`)&&!@V@.startsWith(`//`)&&!@V@.startsWith(`PFX/`))@V@=`PFX`+@V@}"
 )
 patch(js, r"convertUrl\((\w),(\w)\)\{",

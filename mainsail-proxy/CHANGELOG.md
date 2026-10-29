@@ -2,9 +2,9 @@
 
 ## 1.1.0
 
-- The webcam now works in the panel with the same settings as your local Mainsail, at home and remotely: cameras with a full address (such as `http://<ip>:8080/?action=stream`) are routed through Home Assistant instead of being loaded directly by the browser.
+- Webcams now work in the panel with the same settings as your local Mainsail, at home and remotely: cameras with a full address (such as `http://<ip>:8080/?action=stream`) are routed through Home Assistant instead of being loaded directly by the browser. Every camera is routed, including several on different ports or machines.
 - Webcams set up with the standard `/webcam/?action=stream` address also work in the panel.
-- The camera address is detected from Mainsail's webcam settings, so `webcam_url` is now optional. Cameras using `/webcam/` are served from the Moonraker host's web server.
+- Camera addresses are detected from Mainsail's webcam settings, so `webcam_url` is now optional. Cameras using `/webcam/` are served from the Moonraker host's web server when it returns a camera image.
 - The start-up self-test checks each camera set up in Mainsail and says how to fix any that won't show in the panel.
 - Camera requests now fail with a clear message when no camera address is set or detected.
 
