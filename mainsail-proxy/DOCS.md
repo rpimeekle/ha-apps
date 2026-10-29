@@ -33,22 +33,38 @@ comes from your **Home Assistant machine's IP**. Either:
 
 ## Webcam
 
-Under the panel, a camera address like `http://192.168.1.50:8080/` can't be
-used directly (and is blocked outright if you open Home Assistant over HTTPS).
-Instead:
+Usually there's nothing to set up. The app reads your camera list from Moonraker
+(the same list your local Mainsail uses) and routes each camera through the
+panel. Your browser only ever talks to Home Assistant, so the cameras work at
+home and remotely (Nabu Casa, HTTPS) with the same settings as your local
+Mainsail.
 
-1. Set **Webcam URL** to your camera streamer's base address, for example
-   `http://192.168.1.50:8080/` for crowsnest/ustreamer. Use the address of
-   the streamer's own page, not of the stream itself (`.../stream` or
-   `...?action=stream`): Mainsail adds that part.
-2. In Mainsail → Settings → Webcams, set the URLs **without a leading slash**:
-   - Stream: `webcam/?action=stream`
-   - Snapshot: `webcam/?action=snapshot`
+- **Cameras with a full address** in Mainsail, such as
+  `http://192.168.1.50:8080/?action=stream`: detected automatically when the
+  app starts, however many cameras, streamers or machines you have.
+- **Cameras with `/webcam/?action=stream`** (the crowsnest default): served by
+  the web server on your Klipper machine. The app tries
+  `http://<moonraker host>/webcam/` and uses it if a camera image comes back.
+  Otherwise, set **Webcam URL** to the address that serves `/webcam/`, e.g.
+  `http://192.168.1.50:81/webcam/`. Keep the `/webcam/` on the end: without
+  it the panel gets Mainsail's own page instead of the camera.
 
-A leading slash (`/webcam/...`) points at the root of your Home Assistant site
-and won't load in the panel. Without it, the same setting still works in the
-Mainsail on your Klipper host, because both resolve to `webcam/` on whichever
-site you're viewing.
+**Webcam URL** is only needed for `/webcam/` cameras that aren't detected. A
+pasted stream address (`.../stream` or `...?action=stream`) is trimmed to the
+camera streamer's base address for you.
+
+Check the log after starting the app:
+```
+Webcam: detected http://192.168.1.50:8080/ from Mainsail's webcam settings
+Self-test webcam 'Ender cam': OK (shown through the panel via http://192.168.1.50:8080/)
+```
+
+Good to know:
+
+- Camera addresses are read when the app starts. Restart the app after
+  adding cameras or changing their addresses in Mainsail.
+- Home Assistant must be able to reach the camera's port. If the self-test says
+  *unreachable*, check the streamer accepts connections from other machines.
 
 ## Options
 
@@ -56,7 +72,7 @@ site you're viewing.
 |---|---|
 | `moonraker_url` | Moonraker address (required). |
 | `moonraker_api_key` | Optional API key sent with every request to Moonraker. |
-| `webcam_url` | Optional camera streamer address, served in the panel at `webcam/`. |
+| `webcam_url` | Optional. Leave empty to detect cameras from Mainsail's settings. Set it to the address that serves `/webcam/` (e.g. `http://<ip>/webcam/`) if `/webcam/` cameras aren't found. |
 | `log_requests` | One log line per request, for troubleshooting. |
 
 ## Good to know

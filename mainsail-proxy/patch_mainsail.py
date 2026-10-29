@@ -61,6 +61,28 @@ patch(js, r"route_prefix:(\w)\.path\}", r"path:\1.path}",
 patch(js, r"getHostUrl:(\w)=>`\$\{\1\.protocol===`wss`\?`https`:`http`\}://\$\{\1\.hostname\}/`",
       lambda m: f"getHostUrl:{m[1]}=>`${{{m[1]}.protocol===`wss`?`https`:`http`}}://${{location.host}}{P}/`",
       expect="?", label="host URL includes panel prefix")
+# Webcam URLs. Mainsail resolves every camera address through convertUrl().
+#  - A full camera address (e.g. http://10.0.0.5:8080/?action=stream) that
+#    starts with one of the camera addresses the app routes
+#    (__HA_WEBCAM_BASES__, space-separated, filled in by nginx) is shown
+#    through the panel at webcams/<index>/, which the app proxies to that
+#    camera. The browser never has to reach the camera itself, so the same
+#    setting works at home and remotely.
+#  - Root-relative addresses ("/webcam/?action=stream") are kept inside the
+#    panel instead of escaping to the root of the Home Assistant site.
+# Outside ingress both placeholders are "" and this is a no-op. Names start
+# with __ so they can't shadow the minified code's own variables.
+CAM_JS = (
+    "if(typeof @V@==`string`){"
+    "let __wb=`__HA_WEBCAM_BASES__`.split(` `).filter(Boolean),__wm=``;"
+    "if(__wb.length&&/^https?:[/][/]/i.test(@V@)){try{let __wu=new URL(@V@).href;"
+    "for(let __w of __wb)if(__wu.startsWith(__w)&&__w.length>__wm.length)__wm=__w;"
+    "if(__wm)@V@=`PFX/webcams/`+__wb.indexOf(__wm)+`/`+__wu.slice(__wm.length)}catch(__wx){}}"
+    "if(@V@.startsWith(`/`)&&!@V@.startsWith(`//`)&&!@V@.startsWith(`PFX/`))@V@=`PFX`+@V@}"
+)
+patch(js, r"convertUrl\((\w),(\w)\)\{",
+      lambda m: f"convertUrl({m[1]},{m[2]}){{" + CAM_JS.replace("@V@", m[1]).replace("PFX", P),
+      label="webcam URLs routed through the panel")
 # Never register Mainsail's service worker: at the HA origin it would claim
 # scope "/" over Home Assistant itself.
 patch(js, r"`serviceWorker`in navigator", "!1", label="disable service worker")
