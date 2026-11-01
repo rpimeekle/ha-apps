@@ -4,7 +4,7 @@
 ARG MAINSAIL_VERSION=v2.19.0
 
 # ---------- fetch + patch stage ----------
-FROM alpine:3.22 AS builder
+FROM alpine:3.24 AS builder
 ARG MAINSAIL_VERSION
 RUN apk add --no-cache curl unzip python3
 COPY patch_mainsail.py /patch_mainsail.py
@@ -16,7 +16,7 @@ RUN set -eux; \
     python3 /patch_mainsail.py /www
 
 # ---------- runtime stage ----------
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk add --no-cache nginx bash curl jq tzdata ca-certificates
 COPY --from=builder /www /var/www/mainsail
 COPY rootfs/ /
