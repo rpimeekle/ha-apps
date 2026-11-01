@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk add --no-cache nginx bash curl jq tzdata ca-certificates
 COPY rootfs/ /
 COPY run.sh /run.sh
